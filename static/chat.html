@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface - ChatWithGithub</title>
+    <link rel="stylesheet" href="/static/modern.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Specific overrides for the chat app logic */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .app-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            min-height: calc(100vh - 64px);
+            padding: 2rem 1rem;
+        }
+
+        .chat-interface {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0e0e11;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+            max-height: calc(100vh - 120px);
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            scroll-behavior: smooth;
+        }
+        
+        .messages-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .messages-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .messages-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .messages-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-area {
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: #18181b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #52525b;
+        }
+
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fafafa;
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            min-height: 60px;
+            max-height: 200px;
+        }
+
+        .input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .send-btn {
+            background: var(--emerald-500);
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 90%;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .bot .avatar {
+            background: #27272a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #34d399;
+        }
+
+        .user .avatar {
+            background: #27272a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a1a1aa;
+        }
+
+        .bubble {
+            background: #18181b;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #d4d4d8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .user .bubble {
+            background: #27272a;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Markdown Styles within Bubbles */
+        .bubble code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .bubble p {
+            margin-bottom: 0.75rem;
+        }
+
+        .bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Setup Screen Overlay */
+        .setup-screen {
+            position: absolute;
+            inset: 0;
+            background: #0e0e11;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .setup-screen.hidden {
+            display: none !important;
+        }
+
+        .repo-input-group {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--zinc-900);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .url-input:focus {
+            border-color: var(--emerald-500);
+            outline: none;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--emerald-500);
+            color: black;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .process-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Loading */
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--zinc-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-step.active {
+            color: var(--emerald-400);
+        }
+
+        .loading-step.completed {
+            color: var(--zinc-300);
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        /* Sources */
+        .sources-list {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .source-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--zinc-500);
+            margin-bottom: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background -->
+    <div class="ambient-bg">
+        <div class="grid-pattern"></div>
+    </div>
+
+    <!-- Nav -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo-group" style="text-decoration: none;">
+                <div class="logo-icon">
+                    <i data-lucide="terminal" size="16"></i>
+                </div>
+                <span style="font-weight: 500; font-size: 0.875rem; color: var(--zinc-300);">ChatWithGithub</span>
+            </a>
+
+            <div id="repo-badge" class="badge" style="margin-bottom: 0; display: none;">
+                <div class="ping-static" style="background: var(--emerald-500);"></div>
+                <span id="active-repo-name" class="badge-text"
+                    style="color: var(--emerald-400); text-transform: none;">...</span>
+            </div>
+
+            <div class="nav-actions">
+                <button id="change-repo-btn" class="shortcut-item"
+                    style="background:none; border:none; cursor:pointer; color: var(--zinc-400);">
+                    Change Repo
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+
+        <div class="chat-interface">
+
+            <!-- Setup Screen (Overlay) -->
+            <div id="setup-screen" class="setup-screen">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div
+                        style="width: 3rem; height: 3rem; background: var(--zinc-800); border-radius: 0.75rem; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-subtle);">
+                        <i data-lucide="github" size="24"></i>
+                    </div>
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Connect a Repository</h2>
+                    <p style="color: var(--zinc-500);">Enter a public GitHub URL to start chatting.</p>
+                </div>
+
+                <div class="repo-input-group">
+                    <input type="text" id="repo-url-input" class="url-input"
+                        placeholder="https://github.com/username/repo">
+                    <button id="process-btn" class="process-btn">
+                        <span id="process-text">Connect Repository</span>
+                        <div id="process-loading"
+                            style="display: none; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i data-lucide="loader-2" class="animate-spin"></i> Processing...
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Loading Steps Visualization -->
+                <div id="loading-steps" style="margin-top: 2rem; width: 100%; max-width: 400px; display: none;">
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="messages-area" class="messages-area">
+                <!-- Welcome Message -->
+                <div class="message bot">
+                    <div class="avatar"><i data-lucide="sparkles" size="16"></i></div>
+                    <div class="bubble">
+                        <p>Hello! I'm ready to answer questions about your codebase. Once connected, ask me anything
+                            about the architecture, logic, or specific files.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <textarea id="chat-input" placeholder="Ask a question about your code..." rows="1"></textarea>
+                    <div class="input-actions">
+                        <div class="shortcuts">
+                            <i data-lucide="paperclip" size="16" style="cursor: pointer; color: var(--zinc-500);"></i>
+                        </div>
+                        <button id="send-btn" class="send-btn">
+                            Send <i data-lucide="send" size="14"></i>
+                        </button>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--zinc-600);">
+                    AI can make mistakes. Verify important code logic.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        lucide.createIcons();
+
+        // Elements
+        const setupScreen = document.getElementById('setup-screen');
+        const repoInput = document.getElementById('repo-url-input');
+        const processBtn = document.getElementById('process-btn');
+        const processText = document.getElementById('process-text');
+        const processLoading = document.getElementById('process-loading');
+        const loadingStepsObj = document.getElementById('loading-steps');
+        const messagesArea = document.getElementById('messages-area');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const repoBadge = document.getElementById('repo-badge');
+        const activeRepoName = document.getElementById('active-repo-name');
+        const changeRepoBtn = document.getElementById('change-repo-btn');
+
+        let activeRepoUrl = '';
+
+        // Processing State
+        const steps = [
+            { id: 'clone', label: 'Cloning repository...' },
+            { id: 'parse', label: 'Parsing code files...' },
+            { id: 'vector', label: 'Generating embeddings...' },
+            { id: 'ready', label: 'Finalizing knowledge base...' }
+        ];
+
+        // Process Handler
+        processBtn.addEventListener('click', async () => {
+            const url = repoInput.value.trim();
+            if (!url) return;
+
+            // UI Loading State
+            processBtn.disabled = true;
+            processText.style.display = 'none';
+            processLoading.style.display = 'flex';
+            loadingStepsObj.style.display = 'block';
+
+            // Render Steps
+            loadingStepsObj.innerHTML = steps.map(s => `
+                <div class="loading-step" id="step-${s.id}">
+                    <i data-lucide="circle" size="12"></i> ${s.label}
+                </div>
+            `).join('');
+            lucide.createIcons();
+
+            // Simulate Steps (Visual only, real process follows)
+            simulateSteps();
+
+            try {
+                // Actual API Call to process repository
+                const res = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repo_url: url })
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.detail || 'Failed to process repository');
+                }
+
+                const data = await res.json();
+
+                // Success
+                activeRepoUrl = url;
+                finishSetup(url);
+
+            } catch (e) {
+                alert('Error processing repository: ' + e.message);
+                resetSetup();
+            }
+        });
+
+        // Chat Handler
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+
+        changeRepoBtn.addEventListener('click', () => {
+            setupScreen.classList.remove('hidden');
+            setupScreen.style.display = 'flex';
+            repoBadge.style.display = 'none';
+        });
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || !activeRepoUrl) return;
+
+            // Add User Message
+            addMessage(text, 'user');
+            chatInput.value = '';
+            
+            // Disable send button temporarily
+            sendBtn.disabled = true;
+
+            // Loading Bot Message
+            const loadingMsgId = addMessage('Thinking...', 'bot', true);
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repo_url: activeRepoUrl, query: text })
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.detail || 'Failed to get response');
+                }
+
+                const data = await res.json();
+
+                // Replace loading with actual response
+                updateMessage(loadingMsgId, data.answer, data.sources);
+
+            } catch (e) {
+                updateMessage(loadingMsgId, "Error: " + e.message);
+            } finally {
+                // Re-enable send button
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        function addMessage(text, type, isLoading = false) {
+            const id = 'msg-' + Date.now();
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.id = id;
+            div.innerHTML = `
+                <div class="avatar">
+                    <i data-lucide="${type === 'bot' ? 'sparkles' : 'user'}" size="16"></i>
+                </div>
+                <div class="bubble">
+                    ${isLoading ? `<div style="display:flex; gap:4px"><span class="status-dot"></span>Thinking...</div>` : formatText(text)}
+                </div>
+            `;
+            messagesArea.appendChild(div);
+            lucide.createIcons();
+            
+            // Smooth scroll to bottom
+            setTimeout(() => {
+                messagesArea.scrollTo({
+                    top: messagesArea.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+            
+            return id;
+        }
+
+        function updateMessage(id, text, sources = []) {
+            const el = document.getElementById(id);
+            if (el) {
+                const bubble = el.querySelector('.bubble');
+                let html = formatText(text);
+
+                if (sources && sources.length > 0) {
+                    html += `<div class="sources-list">`;
+                    sources.forEach(s => {
+                        html += `
+                            <div class="source-item">
+                                <i data-lucide="file-code" size="12"></i>
+                                <span>${s.source.split('/').pop()}</span>
+                            </div>
+                         `;
+                    });
+                    html += `</div>`;
+                }
+
+                bubble.innerHTML = html;
+                lucide.createIcons();
+                
+                // Smooth scroll to bottom after update
+                setTimeout(() => {
+                    messagesArea.scrollTo({
+                        top: messagesArea.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            }
+        }
+
+        function formatText(text) {
+            // Simple formatting
+            return text
+                .replace(/\n/g, '<br>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+
+        // Helpers
+        function simulateSteps() {
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i >= steps.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                const id = steps[i].id;
+                document.getElementById(`step-${id}`).classList.add('active');
+                if (i > 0) {
+                    document.getElementById(`step-${steps[i - 1].id}`).classList.remove('active');
+                    document.getElementById(`step-${steps[i - 1].id}`).classList.add('completed');
+                }
+                i++;
+            }, 800);
+        }
+
+        function finishSetup(url) {
+            setupScreen.classList.add('hidden');
+            setupScreen.style.display = 'none';
+            repoBadge.style.display = 'flex';
+            activeRepoName.textContent = url.split('/').slice(-2).join('/');
+
+            // Reset button state for next time
+            processBtn.disabled = false;
+            processText.style.display = 'block';
+            processLoading.style.display = 'none';
+            loadingStepsObj.style.display = 'none';
+            
+            // Focus on chat input
+            chatInput.focus();
+        }
+
+        function resetSetup() {
+            processBtn.disabled = false;
+            processText.style.display = 'block';
+            processLoading.style.display = 'none';
+            loadingStepsObj.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

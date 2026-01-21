@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatWithGithub - Chat with your codebase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/modern.css">
+    <style>
+        /* Smooth scroll */
+        html { scroll-behavior: smooth; }
+        
+        /* Hero section styles */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .animate-blink { animation: blink 1s step-end infinite; }
+        
+        body::-webkit-scrollbar { width: 8px; }
+        body::-webkit-scrollbar-track { background: #09090b; }
+        body::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+    </style>
+</head>
+
+<body class="min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-zinc-700 selection:text-white overflow-x-hidden">
+
+    <!-- HERO SECTION -->
+    <section id="hero-section">
+        <!-- Ambient Background Effects -->
+        <div class="fixed inset-0 z-0 pointer-events-none">
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+                style="mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)">
+            </div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen">
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="relative z-50 w-full border-b border-white/5 bg-[#09090b]/80 backdrop-blur-xl">
+            <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2 group cursor-pointer">
+                    <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:border-white/20 transition-colors">
+                        <i data-lucide="terminal" class="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors"></i>
+                    </div>
+                    <span class="font-medium text-sm tracking-tight text-zinc-300 group-hover:text-white transition-colors">
+                        ChatWithGithub
+                    </span>
+                </div>
+
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-500">
+                    <a href="#hero-section" class="hover:text-zinc-200 transition-colors">Home</a>
+                    <a href="#features" class="hover:text-zinc-200 transition-colors">Features</a>
+                    <a href="/static/chat.html" class="hover:text-zinc-200 transition-colors">Try Now</a>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="/static/chat.html" class="h-9 px-4 rounded-md bg-white text-black text-sm font-medium hover:bg-zinc-200 transition-colors flex items-center gap-2">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                        <span>Connect Repo</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+
+        <!-- Hero Content -->
+        <main class="relative z-10 flex flex-col items-center justify-start pt-24 pb-20 px-4 sm:px-6">
+            <!-- Badge -->
+            <div class="animate-fade-in-up flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 hover:bg-white/10 transition-colors cursor-pointer group">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs font-medium text-zinc-400 tracking-wide uppercase group-hover:text-zinc-200 transition-colors">
+                    GPT-4o Integration Live
+                </span>
+            </div>
+
+            <!-- Headline -->
+            <div class="text-center max-w-4xl mx-auto space-y-6 mb-12">
+                <h1 class="text-5xl md:text-7xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-zinc-500">
+                    Chat with your codebase.
+                </h1>
+                <p class="text-lg md:text-xl text-zinc-500 max-w-2xl mx-auto font-light leading-relaxed">
+                    Stop searching, start asking. Connect your GitHub repositories and get instant, context-aware answers
+                    about your logic, bugs, and architecture.
+                </p>
+            </div>
+
+
+            <!-- Interactive Command Interface -->
+            <div class="w-full max-w-3xl mx-auto mb-20 relative group">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-zinc-700 to-zinc-800 rounded-2xl opacity-20 blur transition duration-500 group-hover:opacity-40 group-hover:blur-md">
+                </div>
+
+                <div class="relative rounded-xl bg-[#0e0e11] border border-white/10 shadow-2xl shadow-black/50 overflow-hidden">
+                    <div class="h-10 border-b border-white/5 bg-white/[0.02] flex items-center px-4 gap-2">
+                        <div class="w-3 h-3 rounded-full bg-zinc-800"></div>
+                        <div class="w-3 h-3 rounded-full bg-zinc-800"></div>
+                        <div class="w-3 h-3 rounded-full bg-zinc-800"></div>
+                        <div class="ml-auto flex items-center gap-2 text-xs text-zinc-600 font-mono">
+                            <i data-lucide="git-branch" class="w-3 h-3"></i>
+                            <span>main</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-8 flex flex-col gap-6">
+                        <div class="flex items-center gap-4 text-lg md:text-xl font-mono text-zinc-300">
+                            <span class="text-emerald-500 shrink-0">$</span>
+                            <span class="relative">
+                                <span id="typed-text"></span>
+                                <span class="animate-blink inline-block w-2.5 h-5 bg-zinc-500 ml-1 align-middle opacity-70"></span>
+                            </span>
+                        </div>
+
+                        <div id="ai-response" class="transition-all duration-1000 ease-out border-l-2 border-zinc-800 pl-4 py-2 opacity-0 translate-y-4">
+                            <div class="flex items-center gap-2 text-xs text-zinc-500 mb-2 uppercase tracking-wider font-semibold">
+                                <i data-lucide="sparkles" class="w-3 h-3 text-zinc-400"></i>
+                                AI Analysis
+                            </div>
+                            <p class="text-zinc-400 leading-relaxed text-sm md:text-base">
+                                The authentication logic is located in <code class="bg-white/5 px-1.5 py-0.5 rounded text-zinc-300">src/auth/provider.tsx</code>. It
+                                uses a Context API to manage the user session and persists the JWT token in localStorage.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/[0.02] px-4 py-3 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex gap-4">
+                            <div class="flex items-center gap-1.5 text-xs text-zinc-500">
+                                <i data-lucide="command" class="w-3 h-3"></i>
+                                <span>Focus</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="h-2 w-2 rounded-full bg-emerald-500/50 animate-pulse"></div>
+                            <span class="text-xs text-zinc-500">Connected to repo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+
+        <!-- Feature Grid -->
+        <section id="features" class="py-24 border-t border-white/5 bg-[#0a0a0c]">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 hover:bg-zinc-900/50 hover:border-white/10 transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-white/20 transition-all mb-4">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-zinc-200 mb-2">Semantic Search</h3>
+                    <p class="text-sm text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">
+                        Don't grep. Understand. Search your codebase by meaning, not just exact keywords.
+                    </p>
+                </div>
+                <div class="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 hover:bg-zinc-900/50 hover:border-white/10 transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-white/20 transition-all mb-4">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-zinc-200 mb-2">Context Aware</h3>
+                    <p class="text-sm text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">
+                        The AI understands your file structure, imports, and component relationships.
+                    </p>
+                </div>
+                <div class="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 hover:bg-zinc-900/50 hover:border-white/10 transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-white/20 transition-all mb-4">
+                        <i data-lucide="cpu" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-zinc-200 mb-2">Private & Secure</h3>
+                    <p class="text-sm text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">
+                        Your code is processed in a secure enclave. We never train on your private repos.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </section>
+
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center;">
+        <div style="text-align: center; color: white;">
+            <div style="width: 3rem; height: 3rem; border: 3px solid rgba(255,255,255,0.1); border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+            <h2 id="loadingTitle" style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Processing Repository</h2>
+            <p id="loadingMessage" style="color: #a1a1aa;">Initializing...</p>
+            <div style="width: 300px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 1.5rem auto; overflow: hidden;">
+                <div id="progressFill" style="height: 100%; background: #10b981; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <div id="loadingSteps" style="text-align: left; max-width: 300px; margin: 0 auto;"></div>
+        </div>
+    </div>
+
+    <!-- CHAT SECTION -->
+    <section id="chat-section" class="relative z-10 bg-[#09090b] border-t border-white/5">
+        <div class="app-container">
+            <div class="chat-interface">
+                <!-- Messages Area -->
+                <div id="messages-area" class="messages-area">
+                    <div class="message bot">
+                        <div class="avatar"><i data-lucide="sparkles" size="16"></i></div>
+                        <div class="bubble">
+                            <p>Hello! I'm ready to answer questions about your codebase. Enter a GitHub repository URL below and ask me anything about the architecture, logic, or specific files.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area">
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" id="repo-url-input" 
+                            placeholder="https://github.com/username/repository"
+                            value="https://github.com/Pratek104/Face_Recognition"
+                            style="width: 100%; padding: 0.75rem; background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; color: white; font-size: 0.9rem;">
+                    </div>
+                    <div class="input-wrapper">
+                        <textarea id="chat-input" placeholder="Ask a question about your code..." rows="1"></textarea>
+                        <div class="input-actions">
+                            <div class="shortcuts">
+                                <i data-lucide="paperclip" size="16" style="cursor: pointer; color: #71717a;"></i>
+                            </div>
+                            <button id="send-btn" class="send-btn">
+                                Send <i data-lucide="send" size="14"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem; font-size: 0.75rem; color: #52525b;">
+                        AI can make mistakes. Verify important code logic.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center;">
+        <div style="text-align: center; color: white;">
+            <div style="width: 3rem; height: 3rem; border: 3px solid rgba(255,255,255,0.1); border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+            <h2 id="loadingTitle" style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Processing Repository</h2>
+            <p id="loadingMessage" style="color: #a1a1aa;">Initializing...</p>
+            <div style="width: 300px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 1.5rem auto; overflow: hidden;">
+                <div id="progressFill" style="height: 100%; background: #10b981; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <div id="loadingSteps" style="text-align: left; max-width: 300px; margin: 0 auto;"></div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #loadingOverlay[style*="display: none"] {
+            display: none !important;
+        }
+        #loadingOverlay[style*="display: flex"] {
+            display: flex !important;
+        }
+    </style>
+
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Hero typing animation
+        const query = "Explain the authentication flow in /src/auth...";
+        const typedTextElement = document.getElementById('typed-text');
+        const aiResponseElement = document.getElementById('ai-response');
+        let currentState = 'typing';
+        let textIndex = 0;
+
+        function typeWriter() {
+            if (currentState === 'typing') {
+                if (textIndex < query.length) {
+                    typedTextElement.textContent += query.charAt(textIndex);
+                    textIndex++;
+                    setTimeout(typeWriter, 80 + Math.random() * 50);
+                } else {
+                    currentState = 'paused';
+                    setTimeout(() => {
+                        aiResponseElement.classList.remove('opacity-0', 'translate-y-4');
+                        aiResponseElement.classList.add('opacity-100', 'translate-y-0');
+                    }, 500);
+                    setTimeout(typeWriter, 3000);
+                }
+            } else if (currentState === 'paused') {
+                currentState = 'deleting';
+                typeWriter();
+            } else if (currentState === 'deleting') {
+                if (textIndex > 0) {
+                    typedTextElement.textContent = query.substring(0, textIndex - 1);
+                    textIndex--;
+                    if (textIndex === query.length - 1) {
+                        aiResponseElement.classList.remove('opacity-100', 'translate-y-0');
+                        aiResponseElement.classList.add('opacity-0', 'translate-y-4');
+                    }
+                    setTimeout(typeWriter, 30);
+                } else {
+                    currentState = 'typing';
+                    setTimeout(typeWriter, 500);
+                }
+            }
+        }
+        setTimeout(typeWriter, 1000);
+
+
+        // Chat functionality
+        const messagesArea = document.getElementById('messages-area');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const repoInput = document.getElementById('repo-url-input');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingTitle = document.getElementById('loadingTitle');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const progressFill = document.getElementById('progressFill');
+        const loadingSteps = document.getElementById('loadingSteps');
+
+        const processingSteps = [
+            { id: 'clone', label: 'Cloning repository', progress: 20 },
+            { id: 'parse', label: 'Parsing code files', progress: 40 },
+            { id: 'chunk', label: 'Chunking documents', progress: 60 },
+            { id: 'embed', label: 'Creating embeddings', progress: 80 },
+            { id: 'query', label: 'Querying AI model', progress: 90 },
+            { id: 'complete', label: 'Processing complete', progress: 100 }
+        ];
+
+        const cachedSteps = [
+            { id: 'load', label: 'Loading cached database', progress: 30 },
+            { id: 'query', label: 'Querying AI model', progress: 70 },
+            { id: 'complete', label: 'Processing complete', progress: 100 }
+        ];
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            const repoUrl = repoInput.value.trim();
+            
+            if (!text || !repoUrl) return;
+
+            addMessage(text, 'user');
+            chatInput.value = '';
+
+            showLoadingScreen();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repo_url: repoUrl, query: text })
+                });
+
+                if (!res.ok) throw new Error('Failed to process');
+
+                const data = await res.json();
+                hideLoadingScreen();
+                addMessage(data.answer, 'bot', data.sources);
+
+            } catch (e) {
+                hideLoadingScreen();
+                addMessage("Error: " + e.message, 'bot');
+            }
+        }
+
+        function addMessage(text, type, sources = []) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerHTML = `
+                <div class="avatar">
+                    <i data-lucide="${type === 'bot' ? 'sparkles' : 'user'}" size="16"></i>
+                </div>
+                <div class="bubble">
+                    ${formatText(text)}
+                    ${sources.length > 0 ? formatSources(sources) : ''}
+                </div>
+            `;
+            messagesArea.appendChild(div);
+            lucide.createIcons();
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+
+        function formatText(text) {
+            return text
+                .replace(/\n/g, '<br>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+
+        function formatSources(sources) {
+            let html = '<div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; font-size: 0.85rem;">';
+            html += '<div style="color: #71717a; margin-bottom: 0.5rem;">📚 Sources:</div>';
+            sources.slice(0, 3).forEach(s => {
+                html += `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #a1a1aa; margin-bottom: 0.5rem; background: rgba(0, 0, 0, 0.2); padding: 0.5rem; border-radius: 0.375rem;">
+                        <i data-lucide="file-code" size="12"></i>
+                        <span>${s.source.split('/').pop()}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function showLoadingScreen() {
+            loadingOverlay.style.display = 'flex';
+            loadingSteps.innerHTML = '';
+            loadingTitle.textContent = 'Processing Repository';
+            
+            processingSteps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: #71717a; font-size: 0.875rem;';
+                stepEl.id = `step-${step.id}`;
+                stepEl.innerHTML = `<span>•</span><span>${step.label}</span>`;
+                loadingSteps.appendChild(stepEl);
+            });
+
+            simulateProgress();
+        }
+
+
+        function hideLoadingScreen() {
+            loadingOverlay.style.display = 'none';
+            progressFill.style.width = '0%';
+        }
+
+        function simulateProgress() {
+            let currentStep = 0;
+            const progressInterval = setInterval(() => {
+                if (currentStep < processingSteps.length) {
+                    const step = processingSteps[currentStep];
+                    const stepEl = document.getElementById(`step-${step.id}`);
+                    if (stepEl) {
+                        stepEl.style.color = '#10b981';
+                    }
+                    loadingMessage.textContent = step.label;
+                    progressFill.style.width = step.progress + '%';
+                    
+                    if (currentStep > 0) {
+                        const prevStepEl = document.getElementById(`step-${processingSteps[currentStep - 1].id}`);
+                        if (prevStepEl) {
+                            prevStepEl.style.color = '#52525b';
+                            prevStepEl.style.textDecoration = 'line-through';
+                        }
+                    }
+                    currentStep++;
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
